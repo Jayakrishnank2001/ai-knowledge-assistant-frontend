@@ -1,0 +1,43 @@
+'use client'
+
+import React, { useState } from 'react'
+import { ArrowUpRight, Eye, EyeOff, LockKeyhole, Mail, Sparkles } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+
+export default function LoginPage({ onLogin }: { onLogin: (email: string, password: string) => void }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [show, setShow] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setLoading(true)
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    onLogin(email, password)
+    setLoading(false)
+  }
+
+  return (
+    <main className="min-h-screen bg-[#faf9fc] p-4 sm:p-8">
+      <div className="mx-auto grid min-h-[calc(100vh-2rem)] max-w-7xl overflow-hidden rounded-[2rem] bg-white shadow-[0_25px_80px_-35px_rgba(65,13,127,.3)] lg:grid-cols-[1.15fr_.85fr]">
+        <section className="relative overflow-hidden bg-gradient-to-br from-[#5312dc] via-[#a513e5] to-[#ef38bd] p-8 text-white sm:p-14 lg:p-20">
+          <div className="absolute -right-20 top-20 size-72 rounded-full border border-white/20" />
+          <div className="absolute -bottom-32 -left-16 size-96 rounded-full bg-white/10 blur-2xl" />
+          <div className="relative flex h-full flex-col">
+            <div className="flex items-center gap-2 font-semibold"><span className="grid size-9 place-items-center rounded-xl bg-white text-[#6419da]">N</span>Nexa <span className="text-white/70">AI</span></div>
+            <div className="my-auto max-w-xl py-20"><p className="mb-8 flex items-center gap-2 text-sm text-white/70"><Sparkles /> AI knowledge, reimagined</p><h1 className="text-5xl font-bold leading-[.98] tracking-[-.065em] sm:text-7xl">Turn your documents into <span className="text-[#ffd5f6]">instant answers.</span></h1><p className="mt-8 max-w-md text-lg leading-relaxed text-white/75">Ask questions across your company&apos;s knowledge base and get grounded answers with sources.</p><div className="mt-10 flex items-center gap-2 text-sm font-medium">Explore your knowledge <ArrowUpRight /></div></div>
+            <p className="text-xs text-white/55">Trusted by teams building the future of work.</p>
+          </div>
+        </section>
+        <section className="flex items-center justify-center p-7 sm:p-14"><div className="w-full max-w-sm"><p className="mb-3 text-sm font-medium text-[#8d42e8]">Welcome back</p><h2 className="text-4xl font-bold tracking-[-.05em] text-[#201534]">Sign in to Nexa</h2><p className="mt-3 text-sm text-[#786b88]">Continue to your private knowledge workspace.</p>
+          <form onSubmit={submit} className="mt-9 flex flex-col gap-5">
+            <label className="flex flex-col gap-2 text-sm font-medium text-[#342641]">Email address<div className="relative"><Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#9b7bb9]" /><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="h-12 w-full rounded-xl border border-[#e4d8ef] bg-[#fcfaff] pl-12 pr-4 outline-none transition focus:border-[#a855f7] focus:ring-4 focus:ring-[#a855f7]/10" /></div></label>
+            <label className="flex flex-col gap-2 text-sm font-medium text-[#342641]">Password<div className="relative"><LockKeyhole className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#9b7bb9]" /><input type={show ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="h-12 w-full rounded-xl border border-[#e4d8ef] bg-[#fcfaff] pl-12 pr-12 outline-none transition focus:border-[#a855f7] focus:ring-4 focus:ring-[#a855f7]/10" /><button type="button" onClick={() => setShow(!show)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9b7bb9]" aria-label={show ? 'Hide password' : 'Show password'}>{show ? <EyeOff /> : <Eye />}</button></div></label>
+            <Button type="submit" disabled={loading} className="h-12 rounded-xl bg-[#5517dd] text-base hover:bg-[#4310bd]">{loading ? 'Signing in...' : 'Sign in'}</Button>
+          </form>
+        </div></section>
+      </div>
+    </main>
+  )
+}
