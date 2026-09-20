@@ -69,7 +69,7 @@ function Shell() {
       className={`${active === 'chat' ? 'h-screen overflow-hidden' : 'min-h-screen overflow-y-auto'} bg-[#faf9fc] md:flex`}
     >
       <div className="hidden md:block">
-        <Sidebar activeTab={active as any} onTabChange={go as any} onLogout={handleLogout} />
+        <Sidebar activeTab={active as any} onTabChange={go as any} onLogout={handleLogout} user={user} />
       </div>
 
       <div
@@ -99,7 +99,7 @@ function Shell() {
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/conversations" element={<ConversationsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings" element={<SettingsPage user={user} onUserChange={setUser} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

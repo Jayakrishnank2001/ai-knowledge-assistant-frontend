@@ -22,6 +22,7 @@ export interface AuthUser {
   id: string
   email: string
   name: string
+  workspaceName?: string
 }
 
 export interface SourceRef {
@@ -101,6 +102,11 @@ export function saveSession(token: string, user: AuthUser): void {
   localStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 
+/** Refresh the cached user (e.g. after a profile update) without touching the token. */
+export function saveUser(user: AuthUser): void {
+  localStorage.setItem(USER_KEY, JSON.stringify(user))
+}
+
 export function clearSession(): void {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
@@ -167,6 +173,9 @@ export const api = {
   me: () => request<AuthUser>('/auth/me'),
 
   logout: () => request<{ success: boolean }>('/auth/logout', { method: 'POST' }),
+
+  updateProfile: (patch: { name?: string; email?: string; workspaceName?: string }) =>
+    request<AuthUser>('/auth/me', { method: 'PATCH', body: JSON.stringify(patch) }),
 
   // -- documents -----------------------------------------------------------
   documents: () => request<DocumentRecord[]>('/documents'),
