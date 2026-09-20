@@ -4,17 +4,31 @@ import React, { useState } from 'react'
 import { ArrowUpRight, Eye, EyeOff, LockKeyhole, Mail, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-export default function LoginPage({ onLogin }: { onLogin: (email: string, password: string) => void }) {
+interface LoginResult {
+  success: boolean
+  error?: string
+}
+
+export default function LoginPage({
+  onLogin,
+}: {
+  onLogin: (email: string, password: string) => Promise<LoginResult>
+}) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
+    if (loading) return
     setLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    onLogin(email, password)
+    setError('')
+    const result = await onLogin(email, password)
+    if (!result.success) {
+      setError(result.error ?? 'Unable to sign in. Please try again.')
+    }
     setLoading(false)
   }
 
@@ -32,6 +46,11 @@ export default function LoginPage({ onLogin }: { onLogin: (email: string, passwo
         </section>
         <section className="flex items-center justify-center p-7 sm:p-14"><div className="w-full max-w-sm"><p className="mb-3 text-sm font-medium text-[#8d42e8]">Welcome back</p><h2 className="text-4xl font-bold tracking-[-.05em] text-[#201534]">Sign in to Nexa</h2><p className="mt-3 text-sm text-[#786b88]">Continue to your private knowledge workspace.</p>
           <form onSubmit={submit} className="mt-9 flex flex-col gap-5">
+            {error && (
+              <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {error}
+              </p>
+            )}
             <label className="flex flex-col gap-2 text-sm font-medium text-[#342641]">Email address<div className="relative"><Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#9b7bb9]" /><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="h-12 w-full rounded-xl border border-[#e4d8ef] bg-[#fcfaff] pl-12 pr-4 outline-none transition focus:border-[#a855f7] focus:ring-4 focus:ring-[#a855f7]/10" /></div></label>
             <label className="flex flex-col gap-2 text-sm font-medium text-[#342641]">Password<div className="relative"><LockKeyhole className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#9b7bb9]" /><input type={show ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="h-12 w-full rounded-xl border border-[#e4d8ef] bg-[#fcfaff] pl-12 pr-12 outline-none transition focus:border-[#a855f7] focus:ring-4 focus:ring-[#a855f7]/10" /><button type="button" onClick={() => setShow(!show)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9b7bb9]" aria-label={show ? 'Hide password' : 'Show password'}>{show ? <EyeOff /> : <Eye />}</button></div></label>
             <Button type="submit" disabled={loading} className="h-12 rounded-xl bg-[#5517dd] text-base hover:bg-[#4310bd]">{loading ? 'Signing in...' : 'Sign in'}</Button>

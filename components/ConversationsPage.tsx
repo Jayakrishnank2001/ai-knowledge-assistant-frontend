@@ -1,41 +1,29 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Header from './Header'
 import ConversationItem from './ConversationItem'
-
-const MOCK_CONVERSATIONS = [
-  {
-    title: 'Leave policy questions',
-    preview: 'How many days of annual leave do employees get?',
-    date: 'Today, 10:24 AM',
-  },
-  {
-    title: 'IT security guidelines',
-    preview: 'What are the password requirements?',
-    date: 'Today, 09:10 AM',
-  },
-  {
-    title: 'Company overview',
-    preview: 'What does the company do?',
-    date: 'Apr 25, 2025',
-  },
-  {
-    title: 'Remote work policy',
-    preview: 'Can employees work from home?',
-    date: 'Apr 24, 2025',
-  },
-  {
-    title: 'Benefits and compensation',
-    preview: 'What health benefits are offered?',
-    date: 'Apr 23, 2025',
-  },
-]
+import { api, ConversationSummary, formatTimestamp } from '@/lib/api'
 
 export default function ConversationsPage() {
-  const handleConversationClick = (title: string) => {
-    console.log('Opening conversation:', title)
-    // In a real app, this would load the conversation
+  const navigate = useNavigate()
+  const [conversations, setConversations] = useState<ConversationSummary[]>([])
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    void api
+      .conversations()
+      .then(setConversations)
+      .catch((requestError) => {
+        setError(
+          requestError instanceof Error ? requestError.message : 'Could not load conversations',
+        )
+      })
+  }, [])
+
+  const openConversation = (id: string) => {
+    navigate(`/chat?conversation=${encodeURIComponent(id)}`)
   }
 
   return (
@@ -46,14 +34,26 @@ export default function ConversationsPage() {
       />
 
       <div className="flex-1 overflow-y-auto">
+        {error && (
+          <div className="my-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
         <div className="divide-y divide-gray-200">
-          {MOCK_CONVERSATIONS.map((conv, idx) => (
+          {conversations.map((conv) => (
             <ConversationItem
-              key={idx}
-              {...conv}
-              onClick={() => handleConversationClick(conv.title)}
+              key={conv.id}
+              title={conv.title}
+              preview={conv.preview}
+              date={formatTimestamp(conv.date)}
+              onClick={() => openConversation(conv.id)}
             />
           ))}
+          {conversations.length === 0 && !error && (
+            <p className="px-4 py-6 text-sm text-gray-500">
+              No conversations yet. Head over to Chat and ask your first question!
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { FileText, MoreVertical } from 'lucide-react'
+import { FileText, MoreVertical, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface DocumentCardProps {
@@ -9,6 +9,7 @@ interface DocumentCardProps {
   fileSize: string
   status: 'completed' | 'processing' | 'failed'
   uploadedAt: string
+  onDelete?: () => void
 }
 
 export default function DocumentCard({
@@ -16,6 +17,7 @@ export default function DocumentCard({
   fileSize,
   status,
   uploadedAt,
+  onDelete,
 }: DocumentCardProps) {
   const statusConfig = {
     completed: { bg: 'bg-green-100', text: 'text-green-700', label: 'Completed' },
@@ -51,6 +53,16 @@ export default function DocumentCard({
           {config.label}
         </div>
         <p className="hidden sm:block text-xs text-gray-500 whitespace-nowrap">{uploadedAt}</p>
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            aria-label={`Delete ${fileName}`}
+            title="Delete document"
+            className="hidden sm:block p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
+          >
+            <Trash2 className="w-4 h-4 text-red-400" />
+          </button>
+        )}
         <button className="hidden sm:block p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0">
           <MoreVertical className="w-4 h-4 text-gray-400" />
         </button>
