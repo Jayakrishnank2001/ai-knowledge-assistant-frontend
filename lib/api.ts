@@ -83,6 +83,11 @@ export interface RecentDocument {
   status: string
 }
 
+export interface AiPreferences {
+  chatModel: string
+  availableModels: string[]
+}
+
 // ---------------------------------------------------------------------------
 // Session helpers (persist the token across page reloads)
 // ---------------------------------------------------------------------------
@@ -225,6 +230,17 @@ export const api = {
   stats: () => request<OverviewStats>('/overview/stats'),
 
   recentDocuments: () => request<RecentDocument[]>('/overview/recent-documents'),
+
+  // -- settings ------------------------------------------------------------------
+  /** Current AI preferences (Gemini chat model persisted in the backend .env). */
+  getAiPreferences: () => request<AiPreferences>('/settings/ai'),
+
+  /** Persist the selected chat model to the backend .env (applies immediately). */
+  updateAiPreferences: (chatModel: string) =>
+    request<AiPreferences>('/settings/ai', {
+      method: 'PUT',
+      body: JSON.stringify({ chatModel }),
+    }),
 }
 // ---------------------------------------------------------------------------
 // Small date helpers used by several pages
