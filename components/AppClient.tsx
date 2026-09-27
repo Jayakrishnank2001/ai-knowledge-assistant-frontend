@@ -59,7 +59,16 @@ function Shell() {
     setAuth(false)
   }
 
-  if (!auth) return <LoginPage onLogin={handleLogin} />
+  // Called by LoginPage after a successful OTP signup - the backend has
+  // already created the user and returned a session token.
+  const handleAuthenticated = (token: string, loggedIn: AuthUser) => {
+    saveSession(token, loggedIn)
+    setUser(loggedIn)
+    setAuth(true)
+    navigate('/')
+  }
+
+  if (!auth) return <LoginPage onLogin={handleLogin} onAuthenticated={handleAuthenticated} />
 
   const active = location.pathname.slice(1) || 'overview'
   const go = (tab: string) => navigate(`/${tab}`)

@@ -88,6 +88,13 @@ export interface AiPreferences {
   availableModels: string[]
 }
 
+export interface SignupStartResponse {
+  success: boolean
+  message: string
+  /** Only present in local dev (SMTP unconfigured) - the code for testing. */
+  devOtp?: string
+}
+
 // ---------------------------------------------------------------------------
 // Session helpers (persist the token across page reloads)
 // ---------------------------------------------------------------------------
@@ -173,6 +180,20 @@ export const api = {
     request<{ token: string; user: AuthUser }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
+    }),
+
+  /** OTP signup, step 1: sends a 6-digit code to the email (resend = call again). */
+  signupStart: (email: string, password: string) =>
+    request<SignupStartResponse>('/auth/signup/start', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+
+  /** OTP signup, step 2: verifies the code, saves the user and starts a session. */
+  signupVerify: (email: string, otp: string) =>
+    request<{ token: string; user: AuthUser }>('/auth/signup/verify', {
+      method: 'POST',
+      body: JSON.stringify({ email, otp }),
     }),
 
   me: () => request<AuthUser>('/auth/me'),
