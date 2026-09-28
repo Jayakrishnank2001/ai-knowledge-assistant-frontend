@@ -133,7 +133,11 @@ interface RequestOptions {
   body?: BodyInit | null
 }
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+/**
+ * Performs the request and turns any non-2xx response into an ApiError.
+ * Callers decide how to read the body (JSON or binary).
+ */
+async function send(path: string, options: RequestOptions = {}): Promise<Response> {
   const headers = new Headers()
   // multipart bodies (FormData) set their own content-type + boundary
   if (!(options.body instanceof FormData)) {
@@ -165,7 +169,18 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new ApiError(message, response.status)
   }
 
+  return response
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const response = await send(path, options)
   return response.json() as Promise<T>
+}
+
+/** Like `request`, but for binary payloads (PDF previews / downloads). */
+async function requestBlob(path: string): Promise<Blob> {
+  const response = await send(path)
+  return response.blob()
 }
 
 export const api = {
@@ -208,6 +223,10 @@ export const api = {
 
   getDocument: (id: string) =>
     request<DocumentRecord>(`/documents/${encodeURIComponent(id)}`),
+
+  /** The original PDF as a Blob - powers the in-app preview and downloads. */
+  documentFile: (id: string) =>
+    requestBlob(`/documents/${encodeURIComponent(id)}/file`),
 
   uploadDocument: (file: File) => {
     const body = new FormData()

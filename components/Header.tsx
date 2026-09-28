@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { MoreVertical, Upload } from 'lucide-react'
+import { Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface HeaderProps {
@@ -35,9 +35,6 @@ export default function Header({
               Upload PDF
             </Button>
           )}
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <MoreVertical className="w-5 h-5 text-gray-600" />
-          </button>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Header from './Header'
 import ChatMessage from './ChatMessage'
-import { ChevronDown, FileText, MoreHorizontal, Paperclip, Send, Sparkles, WandSparkles } from 'lucide-react'
+import { ChevronDown, FileText, Paperclip, Send, Sparkles, WandSparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { api, formatClock, ChatMessage as ApiMessage } from '@/lib/api'
 
@@ -37,11 +37,14 @@ function toUiMessage(message: ApiMessage): Message {
   }
 }
 
+function queryParams(location: any): URLSearchParams {
+  return typeof location?.searchParams?.get === 'function'
+    ? location.searchParams
+    : new URLSearchParams((location?.search ?? '').replace(/^\?/, ''))
+}
+
 function queryConversationId(location: any): string | null {
-  const params =
-    typeof location?.searchParams?.get === 'function'
-      ? location.searchParams
-      : new URLSearchParams((location?.search ?? '').replace(/^\?/, ''))
+  const params = queryParams(location)
   return params.get('conversation') ?? params.get('conversationId')
 }
 
@@ -54,6 +57,9 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [loadingPhase, setLoadingPhase] = useState('Searching your knowledge base...')
   const endRef = useRef<HTMLDivElement>(null)
+  // Guards the auto-ask effect below so the same /chat?question=... URL only
+  // sends once per mount (React strict mode / effect re-runs).
+  const askedFor = useRef<string | null>(null)
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, isLoading])
 
   // Load a conversation when arriving from /conversations?conversation=ID,
@@ -116,16 +122,28 @@ export default function ChatPage() {
     await sendWith(inputValue)
   }
 
+  // Auto-ask when arriving from the Overview page's "Frequently asked
+  // questions" links (/chat?question=...). The askedFor ref ensures the
+  // question is only sent once per mount.
+  useEffect(() => {
+    const question = queryParams(location).get('question')
+    if (!question) {
+      askedFor.current = null
+      return
+    }
+    if (askedFor.current === question) return
+    askedFor.current = question
+    void sendWith(question)
+  }, [location])
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#fbf9ff]">
       <Header title="Chat" description="Ask questions about your documents" compact />
       <div className="flex shrink-0 items-center justify-between border-b border-[#eadffb] bg-white/70 px-6 py-2.5 text-xs">
         <div className="flex items-center gap-3">
-          <span className="font-semibold text-[#201b29]">Leave &amp; workplace policies</span>
-          <span className="rounded-full bg-[#f0e8ff] px-2.5 py-1 text-[#5517dd]">All documents <ChevronDown className="ml-1 inline size-3" /></span>
+          <span className="rounded-full bg-[#f0e8ff] px-2.5 py-1 text-[#5517dd]">All documents</span>
           <span className="flex items-center gap-1 text-emerald-600"><span className="size-1.5 rounded-full bg-emerald-500" /> Nexa AI ready</span>
         </div>
-        <button aria-label="More options" className="rounded-lg p-1.5 hover:bg-[#f0e8ff]"><MoreHorizontal className="size-4" /></button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-6 lg:p-8">
         {messages.length === 0 && (

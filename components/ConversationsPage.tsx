@@ -4,11 +4,14 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from './Header'
 import ConversationItem from './ConversationItem'
+import ConfirmModal from './ConfirmModal'
 import { api, ConversationSummary, formatTimestamp } from '@/lib/api'
 
 export default function ConversationsPage() {
   const navigate = useNavigate()
   const [conversations, setConversations] = useState<ConversationSummary[]>([])
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<ConversationSummary | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -24,6 +27,24 @@ export default function ConversationsPage() {
 
   const openConversation = (id: string) => {
     navigate(`/chat?conversation=${encodeURIComponent(id)}`)
+  }
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return
+    const id = pendingDelete.id
+    try {
+      setDeletingId(id)
+      await api.deleteConversation(id)
+      setConversations((prev) => prev.filter((conv) => conv.id !== id))
+      setError('')
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error ? requestError.message : 'Could not delete conversation',
+      )
+    } finally {
+      setDeletingId(null)
+      setPendingDelete(null)
+    }
   }
 
   return (
@@ -47,6 +68,8 @@ export default function ConversationsPage() {
               preview={conv.preview}
               date={formatTimestamp(conv.date)}
               onClick={() => openConversation(conv.id)}
+              onDelete={() => setPendingDelete(conv)}
+              deleting={deletingId === conv.id}
             />
           ))}
           {conversations.length === 0 && !error && (
@@ -56,6 +79,15 @@ export default function ConversationsPage() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={pendingDelete !== null}
+        title="Delete conversation"
+        message={`"${pendingDelete?.title ?? ''}" and all of its messages will be permanently deleted. This cannot be undone.`}
+        busy={deletingId !== null}
+        onConfirm={() => void confirmDelete()}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   )
 }

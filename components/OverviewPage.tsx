@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ArrowUpRight, FileText, MessageSquare, Sparkles, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { api, OverviewStats, RecentDocument } from '@/lib/api'
@@ -12,6 +13,7 @@ const questions = [
 ]
 
 export default function OverviewPage({ onAsk }: { onAsk: () => void }) {
+  const navigate = useNavigate()
   const [stats, setStats] = useState<OverviewStats | null>(null)
   const [recent, setRecent] = useState<RecentDocument[]>([])
   const [error, setError] = useState('')
@@ -76,7 +78,7 @@ export default function OverviewPage({ onAsk }: { onAsk: () => void }) {
                 <h2 className="section-title">Recent documents</h2>
                 <p className="muted">Your latest knowledge base updates</p>
               </div>
-              <button className="icon-link">View all <ArrowUpRight /></button>
+              <button className="icon-link" onClick={() => navigate('/documents')}>View all <ArrowUpRight /></button>
             </div>
             <div className="mt-6 flex flex-col gap-3">
               {error && <p className="text-sm text-red-600">{error}</p>}
@@ -122,7 +124,7 @@ export default function OverviewPage({ onAsk }: { onAsk: () => void }) {
           <h2 className="section-title">Frequently asked questions</h2>
           <div className="mt-4 grid gap-2 md:grid-cols-3">
             {questions.map((q) => (
-              <button key={q} onClick={onAsk} className="rounded-xl bg-[#faf8fd] p-4 text-left text-sm text-[#554e61] transition hover:bg-[#f1e9ff] hover:text-[#5517dd]">{q}<ArrowUpRight className="mt-3 text-[#a28cae]" /></button>
+              <button key={q} onClick={() => navigate(`/chat?question=${encodeURIComponent(q)}`)} className="rounded-xl bg-[#faf8fd] p-4 text-left text-sm text-[#554e61] transition hover:bg-[#f1e9ff] hover:text-[#5517dd]">{q}<ArrowUpRight className="mt-3 text-[#a28cae]" /></button>
             ))}
           </div>
         </div>

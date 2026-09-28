@@ -4,11 +4,16 @@ import React, { useEffect, useState } from 'react'
 import Header from './Header'
 import DocumentCard from './DocumentCard'
 import UploadModal from './UploadModal'
+import ConfirmModal from './ConfirmModal'
+import DocumentPreviewModal from './DocumentPreviewModal'
 import { api, DocumentRecord, formatTimestamp } from '@/lib/api'
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<DocumentRecord[]>([])
   const [isUploadOpen, setIsUploadOpen] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<DocumentRecord | null>(null)
+  const [pendingPreview, setPendingPreview] = useState<DocumentRecord | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -45,14 +50,22 @@ export default function DocumentsPage() {
     }
   }
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+  const handleDelete = (doc: DocumentRecord) => {
+    setPendingDelete(doc)
+  }
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return
     try {
-      await api.deleteDocument(id)
+      setDeletingId(pendingDelete.id)
+      await api.deleteDocument(pendingDelete.id)
       setError('')
       void refresh()
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Delete failed')
+    } finally {
+      setDeletingId(null)
+      setPendingDelete(null)
     }
   }
 
@@ -87,7 +100,8 @@ export default function DocumentsPage() {
               fileSize={doc.fileSize}
               status={doc.status}
               uploadedAt={formatTimestamp(doc.uploadedAt)}
-              onDelete={() => void handleDelete(doc.id, doc.fileName)}
+              onPreview={() => setPendingPreview(doc)}
+              onDelete={() => handleDelete(doc)}
             />
           ))}
         </div>
@@ -97,6 +111,20 @@ export default function DocumentsPage() {
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
         onUpload={handleUpload}
+      />
+
+      <ConfirmModal
+        isOpen={pendingDelete !== null}
+        title="Delete document"
+        message={`"${pendingDelete?.fileName ?? ''}" will be permanently removed from your knowledge base. This cannot be undone.`}
+        busy={deletingId !== null}
+        onConfirm={() => void confirmDelete()}
+        onClose={() => setPendingDelete(null)}
+      />
+
+      <DocumentPreviewModal
+        document={pendingPreview}
+        onClose={() => setPendingPreview(null)}
       />
     </div>
   )

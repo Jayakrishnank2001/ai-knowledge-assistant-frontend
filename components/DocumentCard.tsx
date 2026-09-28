@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { FileText, MoreVertical, Trash2 } from 'lucide-react'
+import { Eye, FileText, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface DocumentCardProps {
@@ -9,6 +9,7 @@ interface DocumentCardProps {
   fileSize: string
   status: 'completed' | 'processing' | 'failed'
   uploadedAt: string
+  onPreview?: () => void
   onDelete?: () => void
 }
 
@@ -17,6 +18,7 @@ export default function DocumentCard({
   fileSize,
   status,
   uploadedAt,
+  onPreview,
   onDelete,
 }: DocumentCardProps) {
   const statusConfig = {
@@ -31,9 +33,30 @@ export default function DocumentCard({
 
   const config = statusConfig[status]
 
+  // The whole row opens the preview, so it also has to be reachable by keyboard.
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!onPreview) return
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      onPreview()
+    }
+  }
+
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-      <div className="flex items-center gap-3 flex-1">
+    <div
+      role={onPreview ? 'button' : undefined}
+      tabIndex={onPreview ? 0 : undefined}
+      onClick={onPreview}
+      onKeyDown={handleKeyDown}
+      title={onPreview ? `Preview ${fileName}` : undefined}
+      aria-label={onPreview ? `Preview ${fileName}` : undefined}
+      className={cn(
+        'group flex items-center justify-between p-4 bg-gray-50 rounded-lg transition-colors',
+        onPreview &&
+          'cursor-pointer hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9b6aff]/40'
+      )}
+    >
+      <div className="flex items-center gap-3 flex-1 min-w-0">
         <FileText className="w-5 h-5 text-blue-600 flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 truncate">
@@ -41,6 +64,14 @@ export default function DocumentCard({
           </p>
           <p className="text-xs text-gray-500">{fileSize}</p>
         </div>
+        {onPreview && (
+          <span
+            aria-hidden="true"
+            className="hidden sm:grid size-6 shrink-0 place-items-center rounded-full text-[#5517dd] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+          >
+            <Eye className="w-4 h-4" />
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-4 ml-4">
         <div
@@ -55,7 +86,10 @@ export default function DocumentCard({
         <p className="hidden sm:block text-xs text-gray-500 whitespace-nowrap">{uploadedAt}</p>
         {onDelete && (
           <button
-            onClick={onDelete}
+            onClick={(event) => {
+              event.stopPropagation()
+              onDelete()
+            }}
             aria-label={`Delete ${fileName}`}
             title="Delete document"
             className="hidden sm:block p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
@@ -63,9 +97,6 @@ export default function DocumentCard({
             <Trash2 className="w-4 h-4 text-red-400" />
           </button>
         )}
-        <button className="hidden sm:block p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0">
-          <MoreVertical className="w-4 h-4 text-gray-400" />
-        </button>
       </div>
     </div>
   )
