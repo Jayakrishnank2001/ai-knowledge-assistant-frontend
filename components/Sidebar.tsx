@@ -1,7 +1,128 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { LayoutGrid,FileText,MessageSquare,History,Settings,LogOut,Sparkles,type LucideIcon } from 'lucide-react'
+import { LayoutGrid, FileText, MessageSquare, History, Settings, LogOut, Sparkles, X, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { AuthUser } from '@/lib/api'
-interface Props{activeTab:string;onTabChange:(tab:string)=>void;onLogout:()=>void;user?:AuthUser|null}
-export default function Sidebar({activeTab,onTabChange,onLogout,user}:Props){const items:[string,string,LucideIcon][]=[['overview','Overview',LayoutGrid],['documents','Documents',FileText],['chat','Chat',MessageSquare],['conversations','Conversations',History]];const initials=(user?.name??'').trim().split(/\s+/).filter(Boolean).map((part)=>part[0]).join('').slice(0,2).toUpperCase()||'?';return <aside className="fixed inset-y-0 left-0 z-20 flex h-screen w-[244px] shrink-0 flex-col border-r border-[#ece8f0] bg-white px-4 py-6"><div className="flex items-center gap-2 px-3"><span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-[#5517dd] to-[#d228cb] text-sm font-bold text-white">N</span><div><p className="font-bold tracking-tight text-[#201b29]">Nexa <span className="gradient-text">AI</span></p><p className="text-[10px] uppercase tracking-widest text-[#aaa2b0]">Knowledge assistant</p></div></div><Button onClick={()=>onTabChange('chat')} className="mt-8 rounded-xl bg-[#5517dd] py-5 shadow-[0_10px_24px_-12px_#5517dd] hover:bg-[#4310bd]"><Sparkles data-icon="inline-start"/>New conversation</Button><nav className="mt-8 flex flex-col gap-1">{items.map(([id,label,Icon])=><button key={id} onClick={()=>onTabChange(String(id))} className={cn('flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition',activeTab===id?'bg-[#f0e8ff] font-medium text-[#5517dd]':'text-[#777180] hover:bg-[#faf8fd] hover:text-[#201b29]')}><Icon />{label}</button>)}</nav><div className="mt-auto flex flex-col gap-1"><button onClick={()=>onTabChange('settings')} className={cn('flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition',activeTab==='settings'?'bg-[#f0e8ff] text-[#5517dd]':'text-[#777180] hover:bg-[#faf8fd]')}><Settings/>Settings</button><button onClick={onLogout} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-[#777180] hover:bg-[#fff4f6] hover:text-[#c23a5b]"><LogOut/>Log out</button><div className="mt-4 flex items-center gap-3 border-t border-[#eeeaf2] px-2 pt-4"><div className="grid size-9 place-items-center rounded-full bg-[#eadcff] text-xs font-bold text-[#6425ca]">{initials}</div><div className="min-w-0"><p className="truncate text-sm font-medium">{user?.name??'Guest'}</p><p className="truncate text-xs text-[#9a94a1]">{user?.workspaceName??user?.email??'Not signed in'}</p></div></div></div></aside>}
+
+interface Props {
+  activeTab: string
+  onTabChange: (tab: string) => void
+  onLogout: () => void
+  user?: AuthUser | null
+  onClose?: () => void
+}
+
+export default function Sidebar({ activeTab, onTabChange, onLogout, user, onClose }: Props) {
+  const items: [string, string, LucideIcon][] = [
+    ['overview', 'Overview', LayoutGrid],
+    ['documents', 'Documents', FileText],
+    ['chat', 'Chat', MessageSquare],
+    ['conversations', 'Conversations', History],
+  ]
+  const initials =
+    (user?.name ?? '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || '?'
+
+  const handleTabClick = (tab: string) => {
+    onTabChange(tab)
+    if (onClose) onClose()
+  }
+
+  const handleLogoutClick = () => {
+    if (onClose) onClose()
+    onLogout()
+  }
+
+  return (
+    <aside className="relative flex h-full w-[260px] shrink-0 flex-col border-r border-[#ece8f0] bg-white px-4 py-6 shadow-sm md:w-[244px]">
+      <div className="flex items-center justify-between px-3">
+        <div className="flex items-center gap-2">
+          <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-[#5517dd] to-[#d228cb] text-sm font-bold text-white">
+            N
+          </span>
+          <div>
+            <p className="font-bold tracking-tight text-[#201b29]">
+              Nexa <span className="gradient-text">AI</span>
+            </p>
+            <p className="text-[10px] uppercase tracking-widest text-[#aaa2b0]">Knowledge assistant</p>
+          </div>
+        </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close menu"
+            className="rounded-lg p-1.5 text-[#777180] hover:bg-[#faf8fd] hover:text-[#201b29] md:hidden"
+          >
+            <X className="size-5" />
+          </button>
+        )}
+      </div>
+
+      <Button
+        onClick={() => handleTabClick('chat')}
+        className="mt-8 rounded-xl bg-[#5517dd] py-5 shadow-[0_10px_24px_-12px_#5517dd] hover:bg-[#4310bd]"
+      >
+        <Sparkles className="size-4" />
+        New conversation
+      </Button>
+
+      <nav className="mt-8 flex flex-col gap-1">
+        {items.map(([id, label, Icon]) => (
+          <button
+            key={id}
+            onClick={() => handleTabClick(String(id))}
+            className={cn(
+              'flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition',
+              activeTab === id
+                ? 'bg-[#f0e8ff] font-medium text-[#5517dd]'
+                : 'text-[#777180] hover:bg-[#faf8fd] hover:text-[#201b29]',
+            )}
+          >
+            <Icon className="size-4" />
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="mt-auto flex flex-col gap-1">
+        <button
+          onClick={() => handleTabClick('settings')}
+          className={cn(
+            'flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition',
+            activeTab === 'settings' ? 'bg-[#f0e8ff] text-[#5517dd]' : 'text-[#777180] hover:bg-[#faf8fd]',
+          )}
+        >
+          <Settings className="size-4" />
+          Settings
+        </button>
+        <button
+          onClick={handleLogoutClick}
+          className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-[#777180] hover:bg-[#fff4f6] hover:text-[#c23a5b]"
+        >
+          <LogOut className="size-4" />
+          Log out
+        </button>
+
+        <div className="mt-4 flex items-center gap-3 border-t border-[#eeeaf2] px-2 pt-4">
+          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-[#eadcff] text-xs font-bold text-[#6425ca]">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">{user?.name ?? 'Guest'}</p>
+            <p className="truncate text-xs text-[#9a94a1]">
+              {user?.workspaceName ?? user?.email ?? 'Not signed in'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  )
+}
+
