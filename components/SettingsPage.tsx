@@ -12,8 +12,12 @@ interface SettingsPageProps {
 /** Human labels for the Gemini model ids returned by the backend. */
 const MODEL_LABELS: Record<string, string> = {
   'gemini-3.8-flash': 'Gemini 3.8 Flash (latest)',
+  'gemini-3.7-flash': 'Gemini 3.7 Flash',
   'gemini-3.6-flash': 'Gemini 3.6 Flash',
-  'gemini-2.5-flash': 'Gemini 2.5 Flash (stable)',
+  'gemini-3.5-flash': 'Gemini 3.5 Flash',
+  'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite (fast, high capacity)',
+  'gemini-3.1-flash-lite': 'Gemini 3.1 Flash-Lite (fast)',
+  'gemini-3-flash-preview': 'Gemini 3 Flash Preview',
 }
 
 function modelLabel(id: string): string {
