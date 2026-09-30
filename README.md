@@ -55,11 +55,10 @@ npm start
 
 | Variable                   | Purpose                            | Default                 |
 | -------------------------- | ---------------------------------- | ----------------------- |
-| `NEXT_PUBLIC_API_BASE_URL` | Backend base URL used by `lib/api.ts` | `http://ai-knowledge-assistant.railway.internal/api` (local: `http://localhost:3001/api`) |
+| `NEXT_PUBLIC_API_BASE_URL` | Backend base URL used by `lib/api.ts` | `https://ai-knowledge-assistant-backend-production.up.railway.app/api` (local: `http://localhost:3001/api`) |
 
 **Deployed URLs:** frontend `https://ai-knowledge-assistant-liart-theta.vercel.app`
-· backend `http://ai-knowledge-assistant.railway.internal/api` (Railway
-*internal* URL — see Troubleshooting if requests fail with DNS errors).
+· backend `https://ai-knowledge-assistant-backend-production.up.railway.app/api`.
 
 > `NEXT_PUBLIC_*` values are **baked in at build time** — change them in
 > `.env.local` and restart the dev server (or rebuild) for changes to take
