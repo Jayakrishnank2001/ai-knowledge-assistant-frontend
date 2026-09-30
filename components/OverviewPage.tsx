@@ -2,15 +2,17 @@
 
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowUpRight, FileText, MessageSquare, Sparkles, TrendingUp } from 'lucide-react'
+import { ArrowUpRight, FileText, MessageSquare, Sparkles, TrendingUp, type LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { api, OverviewStats, RecentDocument } from '@/lib/api'
+import { api, OverviewStats, RecentDocument, type DocumentStatus } from '@/lib/api'
 
 const questions = [
   'How many annual leave days do employees receive?',
   'What are the password requirements?',
   'How do I request parental leave?',
 ]
+
+const statIcons: LucideIcon[] = [FileText, FileText, TrendingUp, MessageSquare]
 
 export default function OverviewPage({ onAsk }: { onAsk: () => void }) {
   const navigate = useNavigate()
@@ -32,14 +34,12 @@ export default function OverviewPage({ onAsk }: { onAsk: () => void }) {
       })
   }, [])
 
-  const statCards: [string, string, any][] = [
-    [stats ? String(stats.documents) : '—', 'Documents', FileText],
-    [stats ? String(stats.pages) : '—', 'Pages', FileText],
-    [stats ? `${stats.processedPercent}%` : '—', 'Processed', TrendingUp],
-    [stats ? String(stats.conversations) : '—', 'Conversations', MessageSquare],
-  ]
+  const statValues = stats
+    ? [String(stats.documents), String(stats.pages), `${stats.processedPercent}%`, String(stats.conversations)]
+    : ['—', '—', '—', '—']
+  const statLabels = ['Documents', 'Pages', 'Processed', 'Conversations']
 
-  const statusOf = (status: string) => {
+  const statusOf = (status: DocumentStatus): { className: string; label: string } => {
     if (status === 'completed') return { className: 'processed', label: 'Processed' }
     if (status === 'processing') return { className: 'processing', label: 'Processing' }
     return { className: 'failed', label: 'Failed' }
@@ -60,15 +60,19 @@ export default function OverviewPage({ onAsk }: { onAsk: () => void }) {
         <Button onClick={onAsk} className="mb-6 rounded-full bg-[#5517dd] px-5 sm:hidden">Ask your knowledge base</Button>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {statCards.map(([value, label, Icon]) => (
-            <div key={String(label)} className="stat-card">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-semibold tracking-tight text-[#191522]">{value}</span>
-                <span className="rounded-xl bg-[#f0e8ff] p-2 text-[#6b24e8]"><Icon /></span>
+          {statValues.map((value, index) => {
+            const Icon = statIcons[index]
+            const label = statLabels[index]
+            return (
+              <div key={label} className="stat-card">
+                <div className="flex items-center justify-between">
+                  <span className="text-3xl font-semibold tracking-tight text-[#191522]">{value}</span>
+                  <span className="rounded-xl bg-[#f0e8ff] p-2 text-[#6b24e8]"><Icon /></span>
+                </div>
+                <span className="mt-2 text-sm text-[#777180]">{label}</span>
               </div>
-              <span className="mt-2 text-sm text-[#777180]">{label}</span>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">

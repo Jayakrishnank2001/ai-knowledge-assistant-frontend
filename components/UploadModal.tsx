@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { CloudUpload, X, File } from 'lucide-react'
+import { CloudUpload, File } from 'lucide-react'
+import Modal from './Modal'
 import { Button } from '@/components/ui/button'
 
 interface UploadModalProps {
@@ -57,23 +58,8 @@ export default function UploadModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#24103d]/55 backdrop-blur-sm">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Upload PDF Document
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6">
+    <Modal title="Upload PDF Document" onClose={onClose} labelledBy="upload-modal-title">
+      <div className="p-6">
           <div
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -137,7 +123,6 @@ export default function UploadModal({
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }

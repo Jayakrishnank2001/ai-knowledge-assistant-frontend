@@ -80,7 +80,7 @@ export interface RecentDocument {
   name: string
   pages: number
   daysAgo: number
-  status: string
+  status: DocumentStatus
 }
 
 export interface AiPreferences {

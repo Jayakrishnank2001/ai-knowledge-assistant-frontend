@@ -3,11 +3,12 @@
 import React from 'react'
 import { Eye, FileText, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { DocumentStatus } from '@/lib/api'
 
 interface DocumentCardProps {
   fileName: string
   fileSize: string
-  status: 'completed' | 'processing' | 'failed'
+  status: DocumentStatus
   uploadedAt: string
   onPreview?: () => void
   onDelete?: () => void
@@ -21,7 +22,7 @@ export default function DocumentCard({
   onPreview,
   onDelete,
 }: DocumentCardProps) {
-  const statusConfig = {
+  const statusConfig: Record<DocumentStatus, { bg: string; text: string; label: string }> = {
     completed: { bg: 'bg-green-100', text: 'text-green-700', label: 'Completed' },
     processing: {
       bg: 'bg-blue-100',
@@ -33,7 +34,6 @@ export default function DocumentCard({
 
   const config = statusConfig[status]
 
-  // The whole row opens the preview, so it also has to be reachable by keyboard.
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!onPreview) return
     if (event.key === 'Enter' || event.key === ' ') {

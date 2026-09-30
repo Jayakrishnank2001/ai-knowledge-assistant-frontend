@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { AlertCircle, Download, ExternalLink, FileText, Loader2, X } from 'lucide-react'
+import { AlertCircle, Download, ExternalLink, FileText, Loader2 } from 'lucide-react'
+import Modal from './Modal'
 import { api, DocumentRecord } from '@/lib/api'
 import { Button } from '@/components/ui/button'
+import { useEscapeKey } from '@/lib/ui'
 
 interface DocumentPreviewModalProps {
   /** The document to preview, or null when the modal is closed. */
@@ -61,14 +63,7 @@ export default function DocumentPreviewModal({
   }, [docId])
 
   // Escape closes the preview.
-  useEffect(() => {
-    if (!doc) return
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [doc, onClose])
+  useEscapeKey(Boolean(doc), onClose)
 
   if (!doc) return null
 
@@ -81,19 +76,13 @@ export default function DocumentPreviewModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#24103d]/55 p-4 backdrop-blur-sm"
-      onClick={onClose}
+    <Modal
+      title={doc.fileName}
+      onClose={onClose}
+      wide
+      labelledBy="document-preview-title"
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="document-preview-title"
-        onClick={(event) => event.stopPropagation()}
-        className="flex h-full max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-white shadow-lg"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4 border-b border-gray-200 p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-[#f4eaff]">
               <FileText className="size-5 text-[#5517dd]" />
@@ -128,13 +117,6 @@ export default function DocumentPreviewModal({
               <Download className="size-4" />
               <span className="hidden sm:inline">Download</span>
             </Button>
-            <button
-              onClick={onClose}
-              aria-label="Close preview"
-              className="rounded p-1 transition-colors hover:bg-gray-100"
-            >
-              <X className="w-5 h-5 text-gray-600" />
-            </button>
           </div>
         </div>
 
@@ -167,7 +149,6 @@ export default function DocumentPreviewModal({
             />
           )}
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }

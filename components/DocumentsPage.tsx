@@ -7,23 +7,22 @@ import UploadModal from './UploadModal'
 import ConfirmModal from './ConfirmModal'
 import DocumentPreviewModal from './DocumentPreviewModal'
 import { api, DocumentRecord, formatTimestamp } from '@/lib/api'
+import { errorText, useDeleteConfirm } from '@/lib/ui'
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<DocumentRecord[]>([])
   const [isUploadOpen, setIsUploadOpen] = useState(false)
-  const [pendingDelete, setPendingDelete] = useState<DocumentRecord | null>(null)
   const [pendingPreview, setPendingPreview] = useState<DocumentRecord | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const confirm = useDeleteConfirm<DocumentRecord>()
 
   const refresh = async () => {
     try {
-      const docs = await api.documents()
-      setDocuments(docs)
+      setDocuments(await api.documents())
       setError('')
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Could not load documents')
+      setError(errorText(requestError, 'Could not load documents'))
     } finally {
       setIsLoading(false)
     }
@@ -46,26 +45,22 @@ export default function DocumentsPage() {
       setError('')
       void refresh()
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Upload failed')
+      setError(errorText(requestError, 'Upload failed'))
     }
   }
 
-  const handleDelete = (doc: DocumentRecord) => {
-    setPendingDelete(doc)
-  }
-
   const confirmDelete = async () => {
-    if (!pendingDelete) return
+    if (!confirm.pending) return
     try {
-      setDeletingId(pendingDelete.id)
-      await api.deleteDocument(pendingDelete.id)
+      confirm.setDeleting(true)
+      await api.deleteDocument(confirm.pending.id)
       setError('')
       void refresh()
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Delete failed')
+      setError(errorText(requestError, 'Delete failed'))
     } finally {
-      setDeletingId(null)
-      setPendingDelete(null)
+      confirm.setDeleting(false)
+      confirm.setPending(null)
     }
   }
 
@@ -101,7 +96,7 @@ export default function DocumentsPage() {
               status={doc.status}
               uploadedAt={formatTimestamp(doc.uploadedAt)}
               onPreview={() => setPendingPreview(doc)}
-              onDelete={() => handleDelete(doc)}
+              onDelete={() => confirm.open(doc)}
             />
           ))}
         </div>
@@ -114,12 +109,12 @@ export default function DocumentsPage() {
       />
 
       <ConfirmModal
-        isOpen={pendingDelete !== null}
+        isOpen={confirm.pending !== null}
         title="Delete document"
-        message={`"${pendingDelete?.fileName ?? ''}" will be permanently removed from your knowledge base. This cannot be undone.`}
-        busy={deletingId !== null}
+        message={`"${confirm.pending?.fileName ?? ''}" will be permanently removed from your knowledge base. This cannot be undone.`}
+        busy={confirm.deleting}
         onConfirm={() => void confirmDelete()}
-        onClose={() => setPendingDelete(null)}
+        onClose={confirm.close}
       />
 
       <DocumentPreviewModal
