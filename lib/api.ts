@@ -2,9 +2,9 @@
  * Tiny typed REST client for the NestJS backend.
  *
  * Every request goes to API_BASE_URL and automatically attaches the Bearer
- * token that was saved after login. Override the backend URL with the
- * NEXT_PUBLIC_API_BASE_URL environment variable if your API doesn't live on
- * http://localhost:3001.
+ * token that was saved after login. The base URL comes from
+ * NEXT_PUBLIC_API_BASE_URL (.env) - the deployed Railway backend by default,
+ * or http://localhost:3001/api when developing locally.
  */
 
 export const API_BASE_URL = (
