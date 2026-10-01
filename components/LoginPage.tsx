@@ -25,7 +25,7 @@ export default function LoginPage({
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [otp, setOtp] = useState('')
-  /** Dev-only hint when SMTP is unconfigured (backend echoes the code back). */
+  /** Dev-only hint when the email service is unconfigured (backend echoes the code back). */
   const [devOtp, setDevOtp] = useState<string | null>(null)
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -184,7 +184,7 @@ export default function LoginPage({
               )}
               {devOtp && (
                 <p className="rounded-xl border border-[#e4d8ef] bg-[#f6f1ff] px-3 py-2 text-sm text-[#5c3ea8]">
-                  Dev mode (SMTP not configured): your code is <strong className="tracking-[0.35em]">{devOtp}</strong>
+                  Dev mode (email not configured): your code is <strong className="tracking-[0.35em]">{devOtp}</strong>
                 </p>
               )}
               <label className="flex flex-col gap-2 text-sm font-medium text-[#342641]">6-digit code<div className="relative"><ShieldCheck className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#9b7bb9]" /><input inputMode="numeric" autoComplete="one-time-code" maxLength={6} required value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="000000" className="h-12 w-full rounded-xl border border-[#e4d8ef] bg-[#fcfaff] pl-12 pr-4 text-lg font-semibold tracking-[0.4em] outline-none transition focus:border-[#a855f7] focus:ring-4 focus:ring-[#a855f7]/10" /></div></label>

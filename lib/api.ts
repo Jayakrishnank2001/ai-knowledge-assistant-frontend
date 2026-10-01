@@ -91,7 +91,7 @@ export interface AiPreferences {
 export interface SignupStartResponse {
   success: boolean
   message: string
-  /** Only present in local dev (SMTP unconfigured) - the code for testing. */
+  /** Only present in local dev (email service unconfigured) - the code for testing. */
   devOtp?: string
 }
 
